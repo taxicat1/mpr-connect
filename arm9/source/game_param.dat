@@ -1,0 +1,28 @@
+static const GameBootParam sGameBootParams[] = {
+	//   Game code      Rom eoo    Eoo RSA verify
+	{ GAME_CODE_D_EN,  0x3B4A00, (void*)0x020143E8 },
+	{ GAME_CODE_D_JA,  0x3C4C00, (void*)0x02014718 },
+	{ GAME_CODE_D_DE,  0x3B4E00, (void*)0x020143E8 },
+	{ GAME_CODE_D_ES,  0x3B4E00, (void*)0x020143F0 },
+	{ GAME_CODE_D_FR,  0x3B4E00, (void*)0x020143FC },
+	{ GAME_CODE_D_IT,  0x3B4E00, (void*)0x02014448 },
+	{ GAME_CODE_D_KR,  0x3B4800, (void*)0x02014420 },
+	
+	{ GAME_CODE_P_EN,  0x3B4A00, (void*)0x020143E8 },
+	{ GAME_CODE_P_JA,  0x3C4C00, (void*)0x02014718 },
+	{ GAME_CODE_P_DE,  0x3B4E00, (void*)0x020143E8 },
+	{ GAME_CODE_P_ES,  0x3B4E00, (void*)0x020143F0 },
+	{ GAME_CODE_P_FR,  0x3B4E00, (void*)0x020143FC },
+	{ GAME_CODE_P_IT,  0x3B4E00, (void*)0x02014448 },
+	{ GAME_CODE_P_KR,  0x3B4800, (void*)0x02014420 },
+	
+	{ GAME_CODE_PT_EN, 0x4B0600, (void*)0x020138BC },
+	{ GAME_CODE_PT_JA, 0x4AD400, (void*)0x020138D8 },
+	{ GAME_CODE_PT_DE, 0x4B0600, (void*)0x020138BC },
+	{ GAME_CODE_PT_ES, 0x4B0800, (void*)0x020138CC },
+	{ GAME_CODE_PT_FR, 0x4B0600, (void*)0x020138D8 },
+	{ GAME_CODE_PT_IT, 0x4B0600, (void*)0x02013924 },
+	{ GAME_CODE_PT_KR, 0x4B1A00, (void*)0x02014420 },
+	
+	{ GAME_CODE_OTHER, 0x000000, NULL              }
+};
