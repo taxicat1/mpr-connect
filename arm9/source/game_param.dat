@@ -1,3 +1,10 @@
+// DP
+// - Japanese release had Rev 0, 5, 6
+// - English release had Rev 5 in US and Rev 13 in EU
+
+// Platinum
+// - English had Rev 0 and Rev 1
+
 static const GameBootParam sGameBootParams[] = {
 	//   Game code      Rom eoo    Eoo RSA verify
 	{ GAME_CODE_D_EN,  0x3B4A00, (void*)0x020143E8 },
@@ -9,7 +16,7 @@ static const GameBootParam sGameBootParams[] = {
 	{ GAME_CODE_D_KR,  0x3B4800, (void*)0x02014420 },
 	
 	{ GAME_CODE_P_EN,  0x3B4A00, (void*)0x020143E8 },
-	{ GAME_CODE_P_JA,  0x3C4C00, (void*)0x02014718 },
+	{ GAME_CODE_P_JA,  0x3C5000, (void*)0x02014718 },
 	{ GAME_CODE_P_DE,  0x3B4E00, (void*)0x020143E8 },
 	{ GAME_CODE_P_ES,  0x3B4E00, (void*)0x020143F0 },
 	{ GAME_CODE_P_FR,  0x3B4E00, (void*)0x020143FC },
