@@ -14,6 +14,10 @@ static void doBoot(void) {
 	REG_AUXIE = 0;
 	REG_AUXIF = 0xFFFFFFFF;
 	
+	// CRITICALLY IMPORTANT: ARM7 needs a valid ROM control register
+	// This register is not shared between ARM7/ARM9 like many of the others
+	REG_ROMCTRL |= CARD_nRESET;
+	
 	void* volatile* entry_ptr = (void* volatile*)fifoGetAddress(FIFO_USER_01);
 	
 	void* entry;
@@ -35,10 +39,6 @@ int main(int argc, char* argv[]) {
 	installSystemFIFO();
 	
 	irqEnable(IRQ_VBLANK);
-	
-	// CRITICALLY IMPORTANT: ARM7 needs a valid ROM control register at all times
-	// This register is not shared between ARM7/ARM9 like many of the others
-	REG_ROMCTRL = CARD_nRESET;
 	
 	while (TRUE) {
 		if (fifoCheckAddress(FIFO_USER_01)) {
