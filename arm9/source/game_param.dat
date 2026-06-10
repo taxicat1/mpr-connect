@@ -3,7 +3,7 @@
 // - English release had Rev 5 in US and Rev 13 in EU
 
 // Platinum
-// - English had Rev 0 and Rev 1
+// - English had Rev 0 and Rev 1 in US and Rev 10 in Europe
 
 static const GameBootParam sGameBootParams[] = {
 	//   Game code      Rom eoo    Eoo RSA verify
