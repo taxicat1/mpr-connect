@@ -73,7 +73,6 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// Display top screen graphic
-	// TODO can this work with full color?
 	videoSetMode(MODE_5_2D);
     vramSetBankA(VRAM_A_MAIN_BG);
     int bg = bgInit(2, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
