@@ -34,7 +34,7 @@ bool Eoo_Init(u32 eoo_rom_offset) {
 	Slot1_ReadRom(sEoo.header, eoo_rom_offset, sizeof(tNDSHeader));
 	
 	// Sanity check to make sure we really got the header
-	if (swiCRC16(0xFFFF, sEoo.header, sizeof(tNDSHeader)) != 0x0000) {
+	if (swiCRC16(0xFFFF, sEoo.header, sizeof(tNDSHeader) - sizeof(u16)) != sEoo.header->headerCRC16) {
 		free(sEoo.header);
 		sEoo.header = NULL;
 		return FALSE;
