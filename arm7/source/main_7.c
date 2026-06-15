@@ -4,7 +4,7 @@
 #include "vcount_spinwait.h"
 
 
-static void doBoot(void) {
+static void doBoot(void* volatile* entry_ptr) {
 	if (isDSiMode()) {
 		DSMode_TouchAndSoundEnable();
 	}
@@ -17,8 +17,6 @@ static void doBoot(void) {
 	// CRITICALLY IMPORTANT: ARM7 needs a valid ROM control register
 	// This register is not shared between ARM7/ARM9 like many of the others
 	REG_ROMCTRL |= CARD_nRESET;
-	
-	void* volatile* entry_ptr = (void* volatile*)fifoGetAddress(FIFO_USER_01);
 	
 	void* entry;
 	do {
@@ -42,7 +40,7 @@ int main(int argc, char* argv[]) {
 	
 	while (TRUE) {
 		if (fifoCheckAddress(FIFO_USER_01)) {
-			doBoot();
+			doBoot((void* volatile*)fifoGetAddress(FIFO_USER_01));
 		}
 		inputGetAndSend();
 		swiWaitForVBlank();
