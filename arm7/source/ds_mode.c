@@ -1,10 +1,9 @@
+#include <nds.h>
+#include <nds/ndstypes.h>
 #include <nds/arm7/codec.h>
 #include <nds/arm7/audio.h>
-#include <nds/ipc.h>
 #include <nds/arm7/i2c.h>
-#include <string.h>
-#include <nds/timers.h>
-#include <nds/dma.h>
+#include <nds/ipc.h>
 
 #include "ds_mode.h"
 
@@ -36,7 +35,8 @@ void DSMode_TouchAndSoundEnable(void) {
 	writePowerManagement(PM_CONTROL_REG, 0x0D);
 	
 	*(vu16*)0x04000500 = 0x807F;
-	*(vu16*)0x04004C04 |= 0x0080;
+	
+	gpioSetWifiMode(GPIO_WIFI_MODE_NTR);
 	
 	REG_SCFG_EXT = 0x93FBFB06;
 	REG_SCFG_EXT &= 0x7FFFFFFF;

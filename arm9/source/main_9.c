@@ -49,7 +49,10 @@ void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, cons
 	reset_header->arm7executeAddress = NULL;
 	fifoSendAddress(FIFO_USER_01, &reset_header->arm7executeAddress);
 	swiWaitForVBlank();
+	
 	REG_IME = 0;
+	REG_IE = 0;
+	REG_IF = 0xFFFFFFFF;
 	
 	// Load the binaries (ITCM memcpy)
 	Bin_Memcpy32(reset_header->arm9destination, boot_arm9, reset_header->arm9binarySize);

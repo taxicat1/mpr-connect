@@ -9,6 +9,7 @@ static void doBoot(void* volatile* entry_ptr) {
 		DSMode_TouchAndSoundEnable();
 	}
 	
+	REG_IME = 0;
 	REG_IE = 0;
 	REG_IF = 0xFFFFFFFF;
 	REG_AUXIE = 0;
