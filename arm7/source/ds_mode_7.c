@@ -1,21 +1,24 @@
 #include <nds.h>
 #include <nds/ndstypes.h>
+
 #include <nds/arm7/codec.h>
 #include <nds/arm7/audio.h>
 #include <nds/arm7/i2c.h>
 #include <nds/ipc.h>
 
-#include "ds_mode.h"
+#include "ds_mode_7.h"
 
 
-// I did not write this. I do not know how this works.
-void DSMode_TouchAndSoundEnable(void) {	
+void DSMode7_Enable(void) {
+	// DSi mode interrupts off
+	REG_AUXIE = 0;
+	REG_AUXIF = 0xFFFFFFFF;
+	
+	// DS mode touch panel and sound codecs
+	// I did not write this. I do not know how this works.
 	REG_SOUNDCNT = 0;
 	REG_SNDCAP0CNT = 0;
 	REG_SNDCAP1CNT = 0;
-	
-	REG_SCFG_CLK = 0x0181;
-	REG_SCFG_ROM = 0x0703;
 	
 	cdcWriteReg(CDC_SOUND, 0x26, 0xA7);
 	cdcWriteReg(CDC_SOUND, 0x27, 0xA7);
@@ -34,10 +37,16 @@ void DSMode_TouchAndSoundEnable(void) {
 	writePowerManagement(PM_READ_REGISTER, 0x00);
 	writePowerManagement(PM_CONTROL_REG, 0x0D);
 	
-	*(vu16*)0x04000500 = 0x807F;
-	
+	// DS mode WiFi
 	gpioSetWifiMode(GPIO_WIFI_MODE_NTR);
 	
+	// DS mode new block clock
+	REG_SCFG_CLK = 0x0181;
+	
+	// DS mode BIOS
+	REG_SCFG_ROM = 0x0703;
+	
+	// DS mode SCFG
 	REG_SCFG_EXT = 0x93FBFB06;
 	REG_SCFG_EXT &= 0x7FFFFFFF;
 }

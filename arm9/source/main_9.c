@@ -9,6 +9,7 @@
 #include "get_eoo.h"
 #include "pkmn_game_codes.h"
 #include "top_screen_img.h"
+#include "ds_mode_9.h"
 
 
 static void prepareBoot() {
@@ -54,6 +55,10 @@ void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, cons
 	REG_IE = 0;
 	REG_IF = 0xFFFFFFFF;
 	
+	if (isDSiMode()) {
+		DSMode9_Enable();
+	}
+	
 	// Load the binaries (ITCM memcpy)
 	Bin_Memcpy32(reset_header->arm9destination, boot_arm9, reset_header->arm9binarySize);
 	Bin_Memcpy32(reset_header->arm7destination, boot_arm7, reset_header->arm7binarySize);
@@ -72,10 +77,6 @@ void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, cons
 
 
 int main(int argc, char* argv[]) {
-	if (isDSiMode()) {
-		setCpuClock(FALSE);
-	}
-	
 	// Display top screen graphic
 	videoSetMode(MODE_5_2D);
     vramSetBankA(VRAM_A_MAIN_BG);

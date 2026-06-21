@@ -1,22 +1,19 @@
 #include <nds.h>
 
-#include "ds_mode.h"
+#include "ds_mode_7.h"
 #include "vcount_spinwait.h"
 
 
 static void doBoot(void* volatile* entry_ptr) {
-	if (isDSiMode()) {
-		DSMode_TouchAndSoundEnable();
-	}
-	
 	REG_IME = 0;
 	REG_IE = 0;
 	REG_IF = 0xFFFFFFFF;
-	REG_AUXIE = 0;
-	REG_AUXIF = 0xFFFFFFFF;
 	
-	// CRITICALLY IMPORTANT: ARM7 needs a valid ROM control register
-	// This register is not shared between ARM7/ARM9 like many of the others
+	if (isDSiMode()) {
+		DSMode7_Enable();
+	}
+	
+	// CRITICALLY IMPORTANT: Both ARM9 and ARM7 needs a valid ROM control register
 	REG_ROMCTRL |= CARD_nRESET;
 	
 	void* entry;
@@ -41,8 +38,10 @@ int main(int argc, char* argv[]) {
 	
 	while (TRUE) {
 		if (fifoCheckAddress(FIFO_USER_01)) {
-			doBoot((void* volatile*)fifoGetAddress(FIFO_USER_01));
+			void* volatile* entry_ptr = (void* volatile*)fifoGetAddress(FIFO_USER_01);
+			doBoot(entry_ptr);
 		}
+		
 		inputGetAndSend();
 		swiWaitForVBlank();
 	}
