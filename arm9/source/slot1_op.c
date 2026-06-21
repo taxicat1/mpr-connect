@@ -145,7 +145,7 @@ static void Blowfish_Init(BlowfishCtx* ctx, u32 game_code, int level) {
 	for (int l = 0; l < level; l++) {
 		if (l == 3) {
 			keycode[1] <<= 1;
-			keycode[2] >>= 2;
+			keycode[2] >>= 1;
 		}
 		
 		Blowfish_Encrypt(ctx, &keycode[1]); // ( keycode[1], keycode[2] )

@@ -13,7 +13,7 @@ static void doBoot(void* volatile* entry_ptr) {
 		DSMode7_Enable();
 	}
 	
-	// CRITICALLY IMPORTANT: Both ARM9 and ARM7 needs a valid ROM control register
+	// CRITICALLY IMPORTANT: Both ARM9 and ARM7 need a valid ROM control register
 	REG_ROMCTRL |= CARD_nRESET;
 	
 	void* entry;
