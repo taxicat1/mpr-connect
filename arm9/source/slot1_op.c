@@ -106,21 +106,6 @@ static inline void ignoreCommandReturn(void) {
 }
 
 
-static void delay(u16 timeout) {
-	// This is witchcraft
-	TIMER_DATA(0) = 0 - (((timeout & 0x3FFF) + 3));
-	TIMER_CR(0)   = TIMER_DIV_256 | TIMER_ENABLE;
-	
-	while (TIMER_DATA(0) != 0xFFFF) {
-		continue;
-	}
-	
-	TIMER_CR(0)   = 0;
-	TIMER_DATA(0) = 0;
-}
-
-
-
 // Blowfish stuff
 
 static inline u32 byteSwap(u32 x) {
@@ -320,6 +305,22 @@ static inline bool slot1Disabled(void) {
 }
 
 
+static void cardDelay(void) {
+	// This is witchcraft
+	u16 timeout = sCardCtx.rom_header.readTimeout;
+	
+	TIMER_DATA(0) = 0 - (((timeout & 0x3FFF) + 3));
+	TIMER_CR(0)   = TIMER_DIV_256 | TIMER_ENABLE;
+	
+	while (TIMER_DATA(0) != 0xFFFF) {
+		continue;
+	}
+	
+	TIMER_CR(0)   = 0;
+	TIMER_DATA(0) = 0;
+}
+
+
 static void resetCard(void) {
 	// Make sure Slot-1 is on
 	if (isDSiMode() && slot1Disabled()) {
@@ -354,7 +355,7 @@ static u32 getCardId90(void) {
 	cmd.bytes[7] = CARD_CMD_HEADER_CHIPID;
 	u32 opflags = CARD_DATA_LEN_4 | CARD_CLK_SLOW; 
 	
-	u32 card_id_90 = 0x90; // Dummy
+	u32 card_id_90 = 0xFFFF0090; // Dummy
 	sendCommand(&cmd, opflags);
 	copyCommandReturn(&card_id_90, 4);
 	return card_id_90;
@@ -367,10 +368,9 @@ static u32 getCardIdB8(void) {
 	u32 ctrl_13 = sCardCtx.rom_header.cardControl13;
 	u32 opflags = (ctrl_13 & ~CARD_DELAY1_MASK) | CARD_DATA_LEN_4;
 	
-	u32 card_id_b8 = 0xB8; // Dummy
+	u32 card_id_b8 = 0xFFFF00B8; // Dummy
 	sendCommand(&cmd, opflags);
 	copyCommandReturn(&card_id_b8, 4);
-	
 	return card_id_b8;
 }
 
@@ -389,7 +389,6 @@ bool Slot1_InitCard(void) {
 	
 	// Check for pullout, which will remove the inited flag if it detects such
 	Slot1_CheckPullout();
-	
 	if (sCardCtx.inited) {
 		return TRUE;
 	}
@@ -402,7 +401,7 @@ bool Slot1_InitCard(void) {
 			memcpy(&sCardCtx.rom_header, rom_header, sizeof(tNDSHeader));
 			
 			u32 card_id = getCardIdB8();
-			if (cardIdValid(card_id)) {
+			if (cardIdValid(card_id) && card_id == getCardIdB8()) {
 				// Seems good
 				sCardCtx.card_id = card_id;
 				sCardCtx.inited = TRUE;
@@ -426,7 +425,7 @@ bool Slot1_InitCard(void) {
 		return FALSE;
 	}
 	
-	int normal_chip = card_id_90 & 0x80000000;
+	bool normal_chip = card_id_90 & 0x80000000;
 	
 	// Key1 + Blowfish setup (not needed after we enter main data mode)
 	Key1Ctx key1;
@@ -434,9 +433,8 @@ bool Slot1_InitCard(void) {
 	Key1Cmd_Init(&key1, game_code);
 	
 	// Set up flags for key1 communication
-	u32 ctrl_13      = sCardCtx.rom_header.cardControl13;
-	u32 ctrl_bf      = sCardCtx.rom_header.cardControlBF;
-	u16 card_timeout = sCardCtx.rom_header.readTimeout;
+	u32 ctrl_13 = sCardCtx.rom_header.cardControl13;
+	u32 ctrl_bf = sCardCtx.rom_header.cardControlBF;
 	
 	u32 flags_key1 = (ctrl_13 & (CARD_WR | CARD_CLK_SLOW)) |
 	                 ((ctrl_bf & (CARD_CLK_SLOW | CARD_DELAY1(0x1FFF))) + ((ctrl_bf & CARD_DELAY2(0x3F)) >> 16));
@@ -458,7 +456,7 @@ bool Slot1_InitCard(void) {
 	if (normal_chip) {
 		sendCommand(&cmd, flags_key1);
 		ignoreCommandReturn();
-		delay(card_timeout);
+		cardDelay();
 	}
 	sendCommand(&cmd, flags_key1);
 	ignoreCommandReturn();
@@ -472,11 +470,11 @@ bool Slot1_InitCard(void) {
 	if (normal_chip) {
 		sendCommand(&cmd, flags_key2);
 		ignoreCommandReturn();
-		delay(card_timeout);
+		cardDelay();
 	}
 	opflags = flags_key2 | CARD_DATA_LEN_4;
 	sendCommand(&cmd, opflags);
-	u32 card_id_10 = 0x10; // Dummy
+	u32 card_id_10 = 0xFFFF0010; // Dummy
 	copyCommandReturn(&card_id_10, 4);
 	
 	// Check card IDs to make sure key1 is working
@@ -490,7 +488,7 @@ bool Slot1_InitCard(void) {
 		sendCommand(&cmd, flags_key2);
 		ignoreCommandReturn();
 	}
-	delay(card_timeout);
+	cardDelay();
 	sendCommand(&cmd, flags_key2);
 	ignoreCommandReturn();
 	
@@ -543,7 +541,7 @@ void Slot1_ReadRom(void* dst, u32 src_addr, u32 len) {
 	u32 skip_bytes = src_addr & 0x1FF;
 	src_addr &= ~0x1FF;
 	
-	u8 page_buffer[0x200];
+	u8 page_buffer[0x200] __attribute__((aligned(4)));
 	
 	while (len != 0) {
 		CardCommand cmd = { 0 };
