@@ -110,11 +110,10 @@ int main(int argc, char* argv[]) {
 		// User pressed start, so try to boot
 		consoleClear();
 		
-		// Initialize Slot-1
+		// Try to initialize Slot-1
 		bool slot1_ok = Slot1_InitCard();
 		if (!slot1_ok) {
-			printf("Failed to read Slot-1 Card.    \n"
-			       "Re-insert it and try again.    \n");
+			printf("Failed to read Slot-1 Card!    \n");
 			continue;
 		}
 		
@@ -133,8 +132,7 @@ int main(int argc, char* argv[]) {
 		// Set up eoo.dat into RAM
 		bool eoo_ok = Eoo_Init(boot_param->eoo_offset);
 		if (!eoo_ok) {
-			printf("Failed to read Slot-1 Card.    \n"
-			       "Re-insert it and try again.    \n");
+			printf("Failed to read Slot-1 Card!    \n");
 			continue;
 		}
 		
