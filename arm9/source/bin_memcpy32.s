@@ -8,28 +8,46 @@
 .global Bin_Memcpy32
 .type Bin_Memcpy32, %function
 Bin_Memcpy32:
-	add   r3, r2, #3
-	lsrs  r3, r3, #2
-	bxeq  lr
+	// r0 = dst, r1 = src, r2 = len
+	push  {r0-r1, r3-r11, lr}
 	
-copy_loop:
-	subs  r3, #1
-	ldr   ip, [r1], #4
-	str   ip, [r0], #4
-	bne   copy_loop
+	// r10 = dst_end
+	add   r10, r0, r2
 	
-	sub   r1, r0, r2
-	bic   r1, #0x1F
+	// r11 = dst_end_32
+	bic   r11, r2, #0x1F
+	add   r11, r0
 	
+	// 32-byte block copy
+copy_loop_32:
+	cmp    r0, r11
+	ldmlo  r1!, {r2-r9}
+	stmlo  r0!, {r2-r9}
+	blo    copy_loop_32
+	
+	// 4-byte word copy
+copy_loop_4:
+	cmp    r0, r10
+	ldmlo  r1!, {r2}
+	stmlo  r0!, {r2}
+	blo    copy_loop_4
+	
+	// r0 = dst_start 32-aligned
+	// r1 = dummy stack alignment
+	pop   {r0-r1}
+	bic   r0, #0x1F
+	mov   r3, #0
+	
+	// Flush data cache, invalidate instruction cache
 cache_loop:
 	mcr   p15, 0, r3, c7, c10, 4  // Wait write buffer empty
-	mcr   p15, 0, r1, c7, c14, 1  // DC flush
-	mcr   p15, 0, r1, c7, c5,  1  // IC invalidate
-	add   r1, #0x20
-	cmp   r1, r0
+	mcr   p15, 0, r0, c7, c14, 1  // DC flush
+	mcr   p15, 0, r0, c7, c5,  1  // IC invalidate
+	add   r0, #0x20
+	cmp   r0, r10
 	blo   cache_loop
 	
-	bx    lr
+	pop   {r3-r11, pc}
 
 .pool
 .end
