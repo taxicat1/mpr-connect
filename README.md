@@ -7,6 +7,8 @@ This requires the Pokémon cartridge to be in Slot-1 of the console while the pr
 - Use a modded DSi and launch mpr-connect via TWiLight Menu++ through Unlaunch
 - Use any Slot-1 flashcart (R4 etc.) to launch mpr-connect, eject the flashcart, and then insert the Pokémon cartridge
 
+Note: the flashcart method will not work on a DSi, 3DS, or 2DS, unless your flashcart runs in DSi mode (such as the DSpico).
+
 ## Building
 
 This is a BlocksDS homebrew ROM. Install [BlocksDS](https://blocksds.skylyrac.net/docs/setup/), then it can be built by running `make` through Wonderful Toolchain.
