@@ -305,7 +305,17 @@ static void Key1Cmd_MakeGetCardId10(Key1Ctx* key1, CardCommand* dst) {
 
 // Slot1 stuff
 
-static inline int slot1Disabled(void) {
+static inline bool cardIdValid(u32 card_id) {
+	return (card_id != 0) && ((card_id >> 16) != 0xFFFF);
+}
+
+
+static inline bool romHeaderValid(tNDSHeader* rom_header) {
+	return swiCRC16(0xFFFF, rom_header, sizeof(tNDSHeader) - sizeof(u16)) == rom_header->headerCRC16;
+}
+
+
+static inline bool slot1Disabled(void) {
 	return (REG_SCFG_MC & SCFG_MC_PWR_MASK) != SCFG_MC_PWR_ON;
 }
 
@@ -375,7 +385,6 @@ static void getCardHeader(void* dst) {
 
 
 bool Slot1_InitCard(void) {
-	CardCommand cmd;
 	sysSetCardOwner(BUS_OWNER_ARM9);
 	
 	// Check for pullout, which will remove the inited flag if it detects such
@@ -385,17 +394,37 @@ bool Slot1_InitCard(void) {
 		return TRUE;
 	}
 	
+	// Check if we are running from Download Play and the card is already inited
+	if (*(vu16*)0x027FFC40 == 2) {
+		tNDSHeader* rom_header = (tNDSHeader*)0x023FE940;
+		if (romHeaderValid(rom_header)) {
+			// Need to get the header first for the card command flags
+			memcpy(&sCardCtx.rom_header, rom_header, sizeof(tNDSHeader));
+			
+			u32 card_id = getCardIdB8();
+			if (cardIdValid(card_id)) {
+				// Seems good
+				sCardCtx.card_id = card_id;
+				sCardCtx.inited = TRUE;
+				return TRUE;
+			}
+		}
+	}
+	
 	// Card reset
 	resetCard();
 	
 	// Get card ID (0x90)
 	u32 card_id_90 = getCardId90();
-	if (card_id_90 == 0 || (card_id_90 >> 16) == 0xFFFF) {
+	if (!cardIdValid(card_id_90)) {
 		return FALSE;
 	}
 	
 	// Read ROM header
 	getCardHeader(&sCardCtx.rom_header);
+	if (!romHeaderValid(&sCardCtx.rom_header)) {
+		return FALSE;
+	}
 	
 	int normal_chip = card_id_90 & 0x80000000;
 	
@@ -415,6 +444,8 @@ bool Slot1_InitCard(void) {
 	if (!normal_chip) {
 		flags_key1 |= CARD_SEC_LARGE;
 	}
+	
+	CardCommand cmd;
 	
 	// Activate key1 mode (Blowfish) (unencrypted command)
 	Key1Cmd_MakeActivateKey1(&key1, &cmd);
@@ -470,8 +501,8 @@ bool Slot1_InitCard(void) {
 		return FALSE;
 	}
 	
-	sCardCtx.inited = TRUE;
 	sCardCtx.card_id = card_id_b8;
+	sCardCtx.inited = TRUE;
 	
 	return TRUE;
 }

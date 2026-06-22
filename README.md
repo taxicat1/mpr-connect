@@ -5,9 +5,8 @@ Connect a retail cartridge of Pokémon Diamond, Pearl, or Platinum to My Pokémo
 This requires the Pokémon cartridge to be in Slot-1 of the console while the program is running. To do this, either:
 - Use a CFW 3DS/2DS and launch mpr-connect via TWiLight Menu++
 - Use a modded DSi and launch mpr-connect via TWiLight Menu++ through Unlaunch
-- Use any Slot-1 flashcart (R4 etc.) to launch mpr-connect, eject the flashcart, and then insert the Pokémon cartridge
-
-Note: the flashcart method will not work on a DSi, 3DS, or 2DS, unless your flashcart runs in DSi mode (such as the DSpico).
+- Use a Slot-1 flashcart (R4 etc.) to launch mpr-connect, eject the flashcart, and then insert the Pokémon cartridge (DS Lite/Phat only, unless your flashcart is a DSpico)
+- Use the Haxxstation exploit to run mpr-connect via DS Download Play
 
 ## Building
 
