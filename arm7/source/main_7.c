@@ -7,11 +7,11 @@
 
 static HardwareMode detectHardware(void) {
 	if (isDSiMode()) {
-		return DSI_MODE_ON_DSI;
+		return HW_DSI_MODE_ON_DSI;
 	} else if ((REG_GPIO_WIFI & GPIO_WIFI_MODE_MASK) == GPIO_WIFI_MODE_NTR) {
-		return DS_MODE_ON_DSI;
+		return HW_DS_MODE_ON_DSI;
 	} else {
-		return DS_MODE_ON_DS;
+		return HW_DS_MODE_ON_DS;
 	}
 }
 

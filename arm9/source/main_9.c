@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
 		if (!slot1_ok) {
 			printf("Failed to read Slot-1 Card!    \n");
 			switch (cur_hardware) {
-				case DS_MODE_ON_DSI:
+				case HW_DS_MODE_ON_DSI:
 					printf("Running in DS mode on DSi/3DS. \n"
 					       "This configuration will not    \n"
 					       "work if the card is removed.   \n"
@@ -135,8 +135,8 @@ int main(int argc, char* argv[]) {
 					       "inserted in advance.           \n");
 					break;
 				
-				case DS_MODE_ON_DS:
-				case DSI_MODE_ON_DSI:
+				case HW_DS_MODE_ON_DS:
+				case HW_DSI_MODE_ON_DSI:
 					printf("Re-insert it and try again.    \n");
 					break;
 			}
