@@ -127,17 +127,20 @@ int main(int argc, char* argv[]) {
 		if (!slot1_ok) {
 			printf("Failed to read Slot-1 Card!    \n");
 			switch (cur_hardware) {
-				case HW_DS_MODE_ON_DSI:
-					printf("Running in DS mode on DSi/3DS. \n"
-					       "This configuration will not    \n"
-					       "work if the card is removed.   \n"
-					       "Use HaxxStation with the card  \n"
-					       "inserted in advance.           \n");
-					break;
-				
 				case HW_DS_MODE_ON_DS:
 				case HW_DSI_MODE_ON_DSI:
 					printf("Re-insert it and try again.    \n");
+					break;
+				
+				case HW_DS_MODE_ON_DSI:
+					printf("Running in DS mode on DSi/3DS. \n"
+					       "                               \n"
+					       "This configuration cannot      \n"
+					       "initialize the game card.      \n"
+					       "Run the program in DSi mode, or\n"
+					       "use a DS Lite/Phat console, or \n"
+					       "use HaxxStation with the card  \n"
+					       "inserted in advance.           \n");
 					break;
 			}
 			
