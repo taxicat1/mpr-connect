@@ -126,14 +126,19 @@ int main(int argc, char* argv[]) {
 		bool slot1_ok = Slot1_InitCard();
 		if (!slot1_ok) {
 			printf("Failed to read Slot-1 Card!    \n");
-			if (cur_hardware == DS_MODE_ON_DSI) {
-				printf("Running in DS mode on DSi/3DS. \n"
-				       "This configuration will not    \n"
-				       "work if the card is removed.   \n"
-				       "Use HaxxStation with the card  \n"
-				       "in place in advance.           \n");
-			} else {
-				printf("Re-insert it and try again.    \n");
+			switch (cur_hardware) {
+				case DS_MODE_ON_DSI:
+					printf("Running in DS mode on DSi/3DS. \n"
+					       "This configuration will not    \n"
+					       "work if the card is removed.   \n"
+					       "Use HaxxStation with the card  \n"
+					       "inserted in advance.           \n");
+					break;
+				
+				case DS_MODE_ON_DS:
+				case DSI_MODE_ON_DSI:
+					printf("Re-insert it and try again.    \n");
+					break;
 			}
 			
 			continue;
