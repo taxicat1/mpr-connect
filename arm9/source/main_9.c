@@ -46,8 +46,7 @@ void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, cons
 	memcpy(reset_header, boot_header, sizeof(tNDSHeader));
 	
 	// Sync with ARM7
-	// Apparently this read must access `boot_header`, not `reset_header`. Caching issue?
-	void* arm7_entry = boot_header->arm7executeAddress;
+	void* arm7_entry = reset_header->arm7executeAddress;
 	reset_header->arm7executeAddress = NULL;
 	fifoSendAddress(FIFO_USER_01, &reset_header->arm7executeAddress);
 	swiWaitForVBlank();
