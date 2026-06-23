@@ -128,7 +128,10 @@ int main(int argc, char* argv[]) {
 			printf("Failed to read Slot-1 Card!    \n");
 			if (cur_hardware == DS_MODE_ON_DSI) {
 				printf("Running in DS mode on DSi/3DS. \n"
-				       "Do not eject the card!         \n");
+				       "This configuration will not    \n"
+				       "work if the card is removed.   \n"
+				       "Use HaxxStation with the card  \n"
+				       "in place in advance.           \n");
 			} else {
 				printf("Re-insert it and try again.    \n");
 			}
