@@ -133,9 +133,9 @@ int main(int argc, char* argv[]) {
 				
 				case HW_DS_MODE_ON_DSI:
 					printf("Running in DS mode on DSi/3DS. \n"
-					       "                               \n"
 					       "This configuration cannot      \n"
 					       "initialize the game card.      \n"
+					       "                               \n"
 					       "Run the program in DSi mode, or\n"
 					       "use a DS Lite/Phat console, or \n"
 					       "use HaxxStation with the card  \n"
