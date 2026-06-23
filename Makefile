@@ -10,7 +10,7 @@ NAME  := mpr-connect
 GAME_TITLE      := My Pokémon Ranch
 GAME_SUBTITLE   := Connect to Wii
 GAME_AUTHOR     := Mow
-GAME_ICON       := icon.gif
+GAME_ICON       := icon.png
 
 # A compile_commands.json file is created if this is set to 1
 COMPDB ?= 0
