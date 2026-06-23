@@ -192,19 +192,23 @@ static inline void Blowfish_EncryptCommand(const BlowfishCtx* ctx, CardCommand* 
 
 // Key1 stuff
 
-static inline void incrementCounter(Key1Ctx* key1) {
-	key1->param.kkkkk = (key1->param.kkkkk + 1) & 0xFFFFF;
+static inline void KeyParam_Init(KeyParam* param) {
+	param->iii   = rand16() & 0xFFF;
+	param->jjj   = rand16() & 0xFFF;
+	param->kkkkk = rand16() ^ (rand16() << 4);
+	param->llll  = rand16();
+	param->mmm   = rand16() & 0xFFF;
+	param->nnn   = rand16() & 0xFFF;
+}
+
+
+static inline void KeyParam_IncrementCounter(KeyParam* param) {
+	param->kkkkk = (param->kkkkk + 1) & 0xFFFFF;
 }
 
 
 static void Key1Cmd_Init(Key1Ctx* key1, u32 game_code) {
-	key1->param.iii   = rand16() & 0xFFF;
-	key1->param.jjj   = rand16() & 0xFFF;
-	key1->param.kkkkk = rand16() ^ (rand16() << 4);
-	key1->param.llll  = rand16();
-	key1->param.mmm   = rand16() & 0xFFF;
-	key1->param.nnn   = rand16() & 0xFFF;
-	
+	KeyParam_Init(&key1->param);
 	Blowfish_Init(&key1->bf, game_code, 2);
 }
 
@@ -237,7 +241,7 @@ static void Key1Cmd_MakeActivateKey2(Key1Ctx* key1, CardCommand* dst) {
 	dst->bytes[0] = key1->param.kkkkk;
 	
 	Blowfish_EncryptCommand(&key1->bf, dst);
-	incrementCounter(key1);
+	KeyParam_IncrementCounter(&key1->param);
 }
 
 
@@ -253,7 +257,7 @@ static void Key1Cmd_MakeEnterMainDataMode(Key1Ctx* key1, CardCommand* dst) {
 	dst->bytes[0] = key1->param.kkkkk;
 	
 	Blowfish_EncryptCommand(&key1->bf, dst);
-	incrementCounter(key1);
+	KeyParam_IncrementCounter(&key1->param);
 }
 
 
@@ -283,7 +287,7 @@ static void Key1Cmd_MakeGetCardId10(Key1Ctx* key1, CardCommand* dst) {
 	dst->bytes[0] = key1->param.kkkkk;
 	
 	Blowfish_EncryptCommand(&key1->bf, dst);
-	incrementCounter(key1);
+	KeyParam_IncrementCounter(&key1->param);
 }
 
 
