@@ -4,6 +4,7 @@
 
 #include "slot1_op.h"
 #include "vcount_spinwait.h"
+#include "hardware_mode.h"
 #include "bin_memcpy32.h"
 #include "game_param.h"
 #include "get_eoo.h"
@@ -91,6 +92,17 @@ int main(int argc, char* argv[]) {
 	consoleInit(&bottom_screen, 3, BgType_Text4bpp, BgSize_T_256x256, 31, 0, false, true);
 	consoleSelect(&bottom_screen);
 	
+	// Wait for hardware infomation from the ARM7
+	HardwareMode cur_hardware;
+	while (TRUE) {
+		if (fifoCheckValue32(FIFO_USER_01)) {
+			cur_hardware = (HardwareMode)fifoGetValue32(FIFO_USER_01);
+			break;
+		}
+		swiWaitForVBlank();
+	}
+	
+	// Ready for main loop
 	bool card_detected = FALSE;
 	while (TRUE) {
 		swiWaitForVBlank();
@@ -114,6 +126,13 @@ int main(int argc, char* argv[]) {
 		bool slot1_ok = Slot1_InitCard();
 		if (!slot1_ok) {
 			printf("Failed to read Slot-1 Card!    \n");
+			if (cur_hardware == DS_MODE_ON_DSI) {
+				printf("Running in DS mode on DSi/3DS. \n"
+				       "Do not eject the card!         \n");
+			} else {
+				printf("Re-insert it and try again.    \n");
+			}
+			
 			continue;
 		}
 		
@@ -132,7 +151,8 @@ int main(int argc, char* argv[]) {
 		// Set up eoo.dat into RAM
 		bool eoo_ok = Eoo_Init(boot_param->eoo_offset);
 		if (!eoo_ok) {
-			printf("Failed to read Slot-1 Card!    \n");
+			printf("Failed to start connection to  \n"
+			       "Ranch! This should not happen! \n");
 			continue;
 		}
 		

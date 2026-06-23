@@ -2,6 +2,18 @@
 
 #include "ds_mode_7.h"
 #include "vcount_spinwait.h"
+#include "hardware_mode.h"
+
+
+static HardwareMode detectHardware(void) {
+	if (isDSiMode()) {
+		return DSI_MODE_ON_DSI;
+	} else if ((REG_GPIO_WIFI & GPIO_WIFI_MODE_MASK) == GPIO_WIFI_MODE_NTR) {
+		return DS_MODE_ON_DSI;
+	} else {
+		return DS_MODE_ON_DS;
+	}
+}
 
 
 static void doBoot(void* volatile* entry_ptr) {
@@ -35,6 +47,10 @@ int main(int argc, char* argv[]) {
 	installSystemFIFO();
 	
 	irqEnable(IRQ_VBLANK);
+	
+	// Send hardware information to the ARM9
+	HardwareMode cur_hardware = detectHardware();
+	fifoSendValue32(FIFO_USER_01, (u32)cur_hardware);
 	
 	while (TRUE) {
 		if (fifoCheckAddress(FIFO_USER_01)) {
