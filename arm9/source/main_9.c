@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 	consoleInit(&bottom_screen, 3, BgType_Text4bpp, BgSize_T_256x256, 31, 0, false, true);
 	consoleSelect(&bottom_screen);
 	
-	// Wait for hardware infomation from the ARM7
+	// Wait for hardware information from the ARM7
 	HardwareMode cur_hardware;
 	while (TRUE) {
 		if (fifoCheckValue32(FIFO_USER_01)) {
@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
 		// We were able to talk to something
 		card_detected = TRUE;
 		
-		// Check the game we found in Slot-1 and load parameters for it
+		// Check that the game we found in Slot-1 is supported
 		u32 game_code = Slot1_GetGameCode();
 		bool game_code_ok = GameCode_IsSupported(game_code);
 		if (!game_code_ok)  {
@@ -174,8 +174,10 @@ int main(int argc, char* argv[]) {
 		
 		// Ready to boot
 		doBoot(Eoo_GetHeader(), Eoo_GetArm9(), Eoo_GetArm7());
+		
+		// <unreachable>
+		break;
 	}
 	
-	// <unreachable>
 	return 0;
 }

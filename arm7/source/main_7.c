@@ -56,12 +56,14 @@ int main(int argc, char* argv[]) {
 		if (fifoCheckAddress(FIFO_USER_01)) {
 			void* volatile* entry_ptr = (void* volatile*)fifoGetAddress(FIFO_USER_01);
 			doBoot(entry_ptr);
+			
+			// <unreachable>
+			break;
 		}
 		
 		inputGetAndSend();
 		swiWaitForVBlank();
 	}
 	
-	// <unreachable>
 	return 0;
 }
