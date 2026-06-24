@@ -26,13 +26,18 @@ typedef struct {
 	u32  rom_end_offset;
 } FSFATEntry;
 
+typedef enum {
+	FS_FILE,
+	FS_FOLDER
+} FSItemType;
+
 
 static s16 FS_FindFolderItem(
 	const void*           fnt_data,
 	const FSFolderAlloc*  cur_folder,
 	const char*           target_name,
 	u32                   target_name_len,
-	bool                  target_is_folder
+	FSItemType            target_type
 ) {
 	s16 folder_item_idx = 0;
 	const char* folder_contents_list = (const char*)fnt_data + cur_folder->fnt_contents_start_offset;
@@ -43,17 +48,17 @@ static s16 FS_FindFolderItem(
 			return -1;
 		}
 		
-		bool is_folder = ((name_len & 0x80) == 0x80);
+		FSItemType type = (name_len & 0x80) ? FS_FOLDER : FS_FILE;
 		name_len &= ~0x80;
 		
 		// Check for match against target
 		if (
-			is_folder == target_is_folder && 
+			type == target_type && 
 			name_len == target_name_len &&
 			strncmp(folder_contents_list, target_name, target_name_len) == 0
 		) {
 			// Found target
-			if (target_is_folder) {
+			if (type == FS_FOLDER) {
 				// Read two byte folder index data
 				folder_item_idx = folder_contents_list[name_len] | (folder_contents_list[name_len + 1] << 8);
 				return folder_item_idx & ~0xF000;
@@ -66,7 +71,7 @@ static s16 FS_FindFolderItem(
 		// Advance to next item
 		folder_item_idx++;
 		folder_contents_list += name_len;
-		if (is_folder) {
+		if (type == FS_FOLDER) {
 			// Advance past two byte folder index data
 			folder_contents_list += 2;
 		}
@@ -80,24 +85,24 @@ static u32 getEooRomOffset(void) {
 	// Get file name table
 	void* fnt_data = malloc(slot1_header->filenameSize);
 	if (fnt_data == NULL) {
-		return -1;
+		return 0xFFFFFFFF;
 	}
 	Slot1_ReadRom(fnt_data, slot1_header->filenameOffset, slot1_header->filenameSize);
 	
 	// Find root -> data
 	const FSFolderAlloc* root_folder = (const FSFolderAlloc*)fnt_data;
-	s16 data_fnt_idx = FS_FindFolderItem(fnt_data, root_folder, "data", 4, TRUE);
+	s16 data_fnt_idx = FS_FindFolderItem(fnt_data, root_folder, "data", 4, FS_FOLDER);
 	if (data_fnt_idx == -1) {
 		free(fnt_data);
-		return -1;
+		return 0xFFFFFFFF;
 	}
 	
 	// Find data -> eoo.dat
 	const FSFolderAlloc* data_folder = (const FSFolderAlloc*)fnt_data + data_fnt_idx;
-	s16 eoo_dat_fat_idx = FS_FindFolderItem(fnt_data, data_folder, "eoo.dat", 7, FALSE);
+	s16 eoo_dat_fat_idx = FS_FindFolderItem(fnt_data, data_folder, "eoo.dat", 7, FS_FILE);
 	if (eoo_dat_fat_idx == -1) {
 		free(fnt_data);
-		return -1;
+		return 0xFFFFFFFF;
 	}
 	
 	// Finally get location of eoo.dat from file allocation table
@@ -117,7 +122,7 @@ static u32 fourAlignUp(u32 x) {
 
 bool Eoo_Init(void) {
 	u32 eoo_rom_offset = getEooRomOffset();
-	if (eoo_rom_offset == (u32)-1) {
+	if (eoo_rom_offset == 0xFFFFFFFF) {
 		return FALSE;
 	}
 	
