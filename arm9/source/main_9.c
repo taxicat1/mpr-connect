@@ -5,8 +5,7 @@
 #include "slot1_op.h"
 #include "vcount_spinwait.h"
 #include "hardware_mode.h"
-#include "bin_memcpy32.h"
-#include "bin_patchrsacheck.h"
+#include "bin_util.h"
 #include "game_code_support.h"
 #include "get_eoo.h"
 #include "pkmn_game_codes.h"
@@ -66,6 +65,9 @@ void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, cons
 	
 	// Find and patch CRYPTO_VerifySignatureWithHash (ITCM)
 	Bin_PatchRSACheck(reset_header->arm9destination, reset_header->arm9binarySize);
+	
+	// Flush data cache, invalidate instruction cache (ITCM)
+	Bin_ClearCache();
 	
 	// Write entry back so ARM7 can see it
 	reset_header->arm7executeAddress = arm7_entry;
