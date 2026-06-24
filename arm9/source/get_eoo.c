@@ -12,12 +12,102 @@ typedef struct {
 // What on EARTH does eoo mean???
 static EooData sEoo = { NULL, NULL, NULL };
 
+typedef struct {
+	u32  fnt_contents_start_offset;
+	u16  fat_contents_start_idx;
+	union {
+		u16  num_subfolders;     // Root folder only
+		u16  parent_folder_idx;
+	};
+} FSFolderAlloc;
 
-#if 0
-static u32 getEooRomOffset(void) {
-	// TODO read FNT/FAT?? A possibility
+typedef struct {
+	u32  rom_start_offset;
+	u32  rom_end_offset;
+} FSFATEntry;
+
+
+static s16 FS_FindFolderItem(
+	const void*           fnt_data,
+	const FSFolderAlloc*  cur_folder,
+	const char*           target_name,
+	u32                   target_name_len,
+	bool                  target_is_folder
+) {
+	s16 folder_item_idx = 0;
+	const char* folder_contents_list = (const char*)fnt_data + cur_folder->fnt_contents_start_offset;
+	while (TRUE) {
+		u8 name_len = *folder_contents_list++;
+		if (name_len == 0) {
+			// End of folder contents
+			return -1;
+		}
+		
+		bool is_folder = ((name_len & 0x80) == 0x80);
+		name_len &= ~0x80;
+		
+		// Check for match against target
+		if (
+			is_folder == target_is_folder && 
+			name_len == target_name_len &&
+			strncmp(folder_contents_list, target_name, target_name_len) == 0
+		) {
+			// Found target
+			if (target_is_folder) {
+				// Read two byte folder index data
+				folder_item_idx = folder_contents_list[name_len] | (folder_contents_list[name_len + 1] << 8);
+				return folder_item_idx & ~0xF000;
+			} else {
+				// Use normal item index within folder
+				return folder_item_idx;
+			}
+		}
+		
+		// Advance to next item
+		folder_item_idx++;
+		folder_contents_list += name_len;
+		if (is_folder) {
+			// Advance past two byte folder index data
+			folder_contents_list += 2;
+		}
+	}
 }
-#endif
+
+
+static u32 getEooRomOffset(void) {
+	const tNDSHeader* slot1_header = Slot1_GetHeader();
+	
+	// Get file name table
+	void* fnt_data = malloc(slot1_header->filenameSize);
+	if (fnt_data == NULL) {
+		return -1;
+	}
+	Slot1_ReadRom(fnt_data, slot1_header->filenameOffset, slot1_header->filenameSize);
+	
+	// Find root -> data
+	const FSFolderAlloc* root_folder = (const FSFolderAlloc*)fnt_data;
+	s16 data_fnt_idx = FS_FindFolderItem(fnt_data, root_folder, "data", 4, TRUE);
+	if (data_fnt_idx == -1) {
+		free(fnt_data);
+		return -1;
+	}
+	
+	// Find data -> eoo.dat
+	const FSFolderAlloc* data_folder = (const FSFolderAlloc*)fnt_data + data_fnt_idx;
+	s16 eoo_dat_fat_idx = FS_FindFolderItem(fnt_data, data_folder, "eoo.dat", 7, FALSE);
+	if (eoo_dat_fat_idx == -1) {
+		free(fnt_data);
+		return -1;
+	}
+	
+	// Finally get location of eoo.dat from file allocation table
+	eoo_dat_fat_idx += data_folder->fat_contents_start_idx;
+	FSFATEntry eoo_dat_fat;
+	Slot1_ReadRom(&eoo_dat_fat, slot1_header->fatOffset + (eoo_dat_fat_idx * sizeof(FSFATEntry)), sizeof(FSFATEntry));
+	
+	free(fnt_data);
+	return eoo_dat_fat.rom_start_offset;
+}
 
 
 static u32 fourAlignUp(u32 x) {
@@ -25,12 +115,13 @@ static u32 fourAlignUp(u32 x) {
 }
 
 
-bool Eoo_Init(u32 eoo_rom_offset) {
+bool Eoo_Init(void) {
 	sEoo.header = malloc(sizeof(tNDSHeader));
 	if (sEoo.header == NULL) {
 		return FALSE;
 	}
 	
+	u32 eoo_rom_offset = getEooRomOffset();
 	Slot1_ReadRom(sEoo.header, eoo_rom_offset, sizeof(tNDSHeader));
 	
 	// Sanity check to make sure we really got the header

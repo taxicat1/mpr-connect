@@ -1,5 +1,5 @@
-#ifndef BIN_MEMCPY32
-#define BIN_MEMCPY32
+#ifndef BIN_MEMCPY32_H
+#define BIN_MEMCPY32_H
 
 #include <nds.h>
 

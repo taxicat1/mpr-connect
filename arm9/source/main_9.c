@@ -6,7 +6,8 @@
 #include "vcount_spinwait.h"
 #include "hardware_mode.h"
 #include "bin_memcpy32.h"
-#include "game_param.h"
+#include "bin_patchrsacheck.h"
+#include "game_code_support.h"
 #include "get_eoo.h"
 #include "pkmn_game_codes.h"
 #include "top_screen_img.h"
@@ -39,7 +40,7 @@ static void prepareBoot() {
 }
 
 
-void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, const void* boot_arm7, void* rsa_verify_addr) {
+void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, const void* boot_arm7) {
 	// Copy the boot header into the reset region
 	// We will also use this to signal the ARM7 to boot
 	tNDSHeader* reset_header = (tNDSHeader*)0x027FFE00;
@@ -63,9 +64,8 @@ void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, cons
 	Bin_Memcpy32(reset_header->arm9destination, boot_arm9, reset_header->arm9binarySize);
 	Bin_Memcpy32(reset_header->arm7destination, boot_arm7, reset_header->arm7binarySize);
 	
-	// Patch out RSA verification
-	((vu32*)rsa_verify_addr)[0] = 0xE3A00001; // mov r0, #1
-	((vu32*)rsa_verify_addr)[1] = 0xE12FFF1E; // bx lr
+	// Find and patch CRYPTO_VerifySignatureWithHash (ITCM)
+	Bin_PatchRSACheck(reset_header->arm9destination, reset_header->arm9binarySize);
 	
 	// Write entry back so ARM7 can see it
 	reset_header->arm7executeAddress = arm7_entry;
@@ -151,33 +151,27 @@ int main(int argc, char* argv[]) {
 		
 		// Check the game we found in Slot-1 and load parameters for it
 		u32 game_code = Slot1_GetGameCode();
-		const GameBootParam* boot_param = GameBootParam_Get(game_code);
-		if (boot_param == NULL)  {
-			printf("Slot-1 Card is not Pokemon     \n"
-			       "Diamond, Pearl, or Platinum    \n");
+		bool game_code_ok = GameCode_IsSupported(game_code);
+		if (!game_code_ok)  {
+			printf("Slot-1 Card is not a supported \n"
+			       "Pokemon Diamond, Pearl,        \n"
+				   "or Platinum                    \n");
 			continue;
 		}
 		
-		// Set up eoo.dat into RAM
-		bool eoo_ok = Eoo_Init(boot_param->eoo_offset);
+		// Set up eoo.dat from game ROM into RAM
+		bool eoo_ok = Eoo_Init();
 		if (!eoo_ok) {
 			printf("Failed to start connection to  \n"
 			       "Ranch! This should not happen! \n");
 			continue;
 		}
 		
-		// Must be OK if we got here
-		
 		// Prepare to boot, setting up environment like the original game does
 		prepareBoot();
 		
 		// Ready to boot
-		doBoot(
-			Eoo_GetHeader(),
-			Eoo_GetArm9(),
-			Eoo_GetArm7(),
-			boot_param->eoo_rsa_verify
-		);
+		doBoot(Eoo_GetHeader(), Eoo_GetArm9(), Eoo_GetArm7());
 	}
 	
 	// <unreachable>

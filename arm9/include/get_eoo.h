@@ -3,7 +3,7 @@
 
 #include <nds.h>
 
-bool Eoo_Init(u32 eoo_rom_offset);
+bool Eoo_Init(void);
 const tNDSHeader* Eoo_GetHeader(void);
 const void* Eoo_GetArm9(void);
 const void* Eoo_GetArm7(void);

@@ -4,6 +4,7 @@
 #define GAME_CODE(code)   ((code[0]) | (code[1] << 8) | (code[2] << 16) | (code[3] << 24))
 #define MAKER_CODE(code)  ((code[0]) | (code[1] << 8))
 
+// All Gen 4 game codes-- Korean language and HGSS not supported
 #define GAME_CODE_D_EN   GAME_CODE("ADAE")
 #define GAME_CODE_D_JA   GAME_CODE("ADAJ")
 #define GAME_CODE_D_DE   GAME_CODE("ADAD")
@@ -25,6 +26,20 @@
 #define GAME_CODE_PT_FR  GAME_CODE("CPUF")
 #define GAME_CODE_PT_IT  GAME_CODE("CPUI")
 #define GAME_CODE_PT_KR  GAME_CODE("CPUK")
+#define GAME_CODE_HG_EN  GAME_CODE("IPKE")
+#define GAME_CODE_HG_JA  GAME_CODE("IPKJ")
+#define GAME_CODE_HG_DE  GAME_CODE("IPKD")
+#define GAME_CODE_HG_ES  GAME_CODE("IPKS")
+#define GAME_CODE_HG_FR  GAME_CODE("IPKF")
+#define GAME_CODE_HG_IT  GAME_CODE("IPKI")
+#define GAME_CODE_HG_KR  GAME_CODE("IPKK")
+#define GAME_CODE_SS_EN  GAME_CODE("IPGE")
+#define GAME_CODE_SS_JA  GAME_CODE("IPGJ")
+#define GAME_CODE_SS_DE  GAME_CODE("IPGD")
+#define GAME_CODE_SS_ES  GAME_CODE("IPGS")
+#define GAME_CODE_SS_FR  GAME_CODE("IPGF")
+#define GAME_CODE_SS_IT  GAME_CODE("IPGI")
+#define GAME_CODE_SS_KR  GAME_CODE("IPGK")
 
 #define GAME_CODE_OTHER  GAME_CODE("####")
 
