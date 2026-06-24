@@ -116,12 +116,15 @@ static u32 fourAlignUp(u32 x) {
 
 
 bool Eoo_Init(void) {
+	u32 eoo_rom_offset = getEooRomOffset();
+	if (eoo_rom_offset == (u32)-1) {
+		return FALSE;
+	}
+	
 	sEoo.header = malloc(sizeof(tNDSHeader));
 	if (sEoo.header == NULL) {
 		return FALSE;
 	}
-	
-	u32 eoo_rom_offset = getEooRomOffset();
 	Slot1_ReadRom(sEoo.header, eoo_rom_offset, sizeof(tNDSHeader));
 	
 	// Sanity check to make sure we really got the header
@@ -131,7 +134,7 @@ bool Eoo_Init(void) {
 		return FALSE;
 	}
 	
-	// Arrange memory so there is a contiguous [header]..[ARM9]..[ARM7] for copying later
+	// Arrange memory so there is a contiguous [header]..[ARM9]..[ARM7].. for copying later
 	// I expect malloc() to do this anyway, but to be rigorous let's manage it
 	u32 header_space = fourAlignUp(sizeof(tNDSHeader));
 	u32 arm9_space   = fourAlignUp(sEoo.header->arm9binarySize);
