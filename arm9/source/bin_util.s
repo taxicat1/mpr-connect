@@ -33,7 +33,7 @@ copy_loop_4:
 	strlo  r2, [r0], #4
 	blo    copy_loop_4
 	
-	pop   {r3-r11, pc}
+	pop    {r3-r11, pc}
 
 .pool
 
