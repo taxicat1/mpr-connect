@@ -52,14 +52,17 @@ static CardSlot1Data sCardCtx = { 0 };
 
 static void Blowfish_Init(BlowfishCtx* ctx, u32 game_code, int level);
 static void Blowfish_Encrypt(const BlowfishCtx* ctx, u32* datap);
-static inline void Blowfish_EncryptCommand(const BlowfishCtx* ctx, CardCommand* cmd);
+static void Blowfish_EncryptCommand(const BlowfishCtx* ctx, CardCommand* cmd);
 
-static void Key1Cmd_Init(Key1Ctx* key, u32 game_code);
-static void Key1Cmd_MakeActivateKey1(Key1Ctx* key, CardCommand* dst);
-static void Key1Cmd_MakeActivateKey2(Key1Ctx* key, CardCommand* dst);
-static void Key1Cmd_MakeEnterMainDataMode(Key1Ctx* key, CardCommand* dst);
-static void Key1Cmd_ConfigureKey2Hardware(Key1Ctx* key, int device_type);
-static void Key1Cmd_MakeGetCardId10(Key1Ctx* key1, CardCommand* dst);
+static void KeyParam_Init(KeyParam* param);
+static void KeyParam_IncrementCounter(KeyParam* param);
+
+static void Key1_Init(Key1Ctx* key, u32 game_code);
+static void Key1_MakeCmdActivateKey1(Key1Ctx* key, CardCommand* dst);
+static void Key1_MakeCmdActivateKey2(Key1Ctx* key, CardCommand* dst);
+static void Key1_MakeCmdEnterMainDataMode(Key1Ctx* key, CardCommand* dst);
+static void Key1_ConfigureKey2Hardware(Key1Ctx* key, int device_type);
+static void Key1_MakeCmdGetCardId10(Key1Ctx* key1, CardCommand* dst);
 
 
 // Misc helpers
@@ -101,14 +104,14 @@ static void copyCommandReturn(void* dest, u32 max_len) {
 }
 
 
-static inline void ignoreCommandReturn(void) {
+static void ignoreCommandReturn(void) {
 	copyCommandReturn(NULL, 0);
 }
 
 
 // Blowfish stuff
 
-static inline u32 byteSwap(u32 x) {
+static u32 byteSwap(u32 x) {
 	// Compiler does a surprisingly good job optimizing this
 	u32 a = x & 0xFF000000;
 	u32 b = x & 0x00FF0000;
@@ -184,7 +187,7 @@ static void Blowfish_Encrypt(const BlowfishCtx* ctx, u32* datap) {
 }
 
 
-static inline void Blowfish_EncryptCommand(const BlowfishCtx* ctx, CardCommand* cmd) {
+static void Blowfish_EncryptCommand(const BlowfishCtx* ctx, CardCommand* cmd) {
 	Blowfish_Encrypt(ctx, &cmd->words[0]);
 }
 
@@ -192,7 +195,7 @@ static inline void Blowfish_EncryptCommand(const BlowfishCtx* ctx, CardCommand* 
 
 // Key1 stuff
 
-static inline void KeyParam_Init(KeyParam* param) {
+static void KeyParam_Init(KeyParam* param) {
 	param->iii   = rand16() & 0xFFF;
 	param->jjj   = rand16() & 0xFFF;
 	param->kkkkk = rand16() ^ (rand16() << 4);
@@ -202,18 +205,18 @@ static inline void KeyParam_Init(KeyParam* param) {
 }
 
 
-static inline void KeyParam_IncrementCounter(KeyParam* param) {
+static void KeyParam_IncrementCounter(KeyParam* param) {
 	param->kkkkk = (param->kkkkk + 1) & 0xFFFFF;
 }
 
 
-static void Key1Cmd_Init(Key1Ctx* key1, u32 game_code) {
+static void Key1_Init(Key1Ctx* key1, u32 game_code) {
 	KeyParam_Init(&key1->param);
 	Blowfish_Init(&key1->bf, game_code, 2);
 }
 
 
-static void Key1Cmd_MakeActivateKey1(Key1Ctx* key1, CardCommand* dst) {
+static void Key1_MakeCmdActivateKey1(Key1Ctx* key1, CardCommand* dst) {
 	// 3C II IJ JJ XK KK KK XX
 	u32 x_1 = 0x0;
 	u32 x_2 = 0x00;
@@ -229,7 +232,7 @@ static void Key1Cmd_MakeActivateKey1(Key1Ctx* key1, CardCommand* dst) {
 }
 
 
-static void Key1Cmd_MakeActivateKey2(Key1Ctx* key1, CardCommand* dst) {
+static void Key1_MakeCmdActivateKey2(Key1Ctx* key1, CardCommand* dst) {
 	// 4L LL LM MM NN NK KK KK
 	dst->bytes[7] = CARD_CMD_ACTIVATE_SEC | (key1->param.llll >> 12);
 	dst->bytes[6] = key1->param.llll >> 4;
@@ -245,7 +248,7 @@ static void Key1Cmd_MakeActivateKey2(Key1Ctx* key1, CardCommand* dst) {
 }
 
 
-static void Key1Cmd_MakeEnterMainDataMode(Key1Ctx* key1, CardCommand* dst) {
+static void Key1_MakeCmdEnterMainDataMode(Key1Ctx* key1, CardCommand* dst) {
 	// AL LL LI II JJ JK KK KK
 	dst->bytes[7] = CARD_CMD_DATA_MODE | (key1->param.llll >> 12);
 	dst->bytes[6] = key1->param.llll >> 4;
@@ -261,7 +264,7 @@ static void Key1Cmd_MakeEnterMainDataMode(Key1Ctx* key1, CardCommand* dst) {
 }
 
 
-static void Key1Cmd_ConfigureKey2Hardware(Key1Ctx* key1, int device_type) {
+static void Key1_ConfigureKey2Hardware(Key1Ctx* key1, int device_type) {
 	static const u8 card_seed_bytes[] = { 0xE8, 0x4D, 0x5A, 0xB1, 0x17, 0x8F, 0x99, 0xD5 };
 	
 	REG_ROMCTRL = 0;
@@ -275,7 +278,7 @@ static void Key1Cmd_ConfigureKey2Hardware(Key1Ctx* key1, int device_type) {
 }
 
 
-static void Key1Cmd_MakeGetCardId10(Key1Ctx* key1, CardCommand* dst) {
+static void Key1_MakeCmdGetCardId10(Key1Ctx* key1, CardCommand* dst) {
 	// 1L LL LI II JJ JK KK KK
 	dst->bytes[7] = CARD_CMD_SECURE_CHIPID | (key1->param.llll >> 12);
 	dst->bytes[6] = key1->param.llll >> 4;
@@ -294,17 +297,17 @@ static void Key1Cmd_MakeGetCardId10(Key1Ctx* key1, CardCommand* dst) {
 
 // Slot1 stuff
 
-static inline bool cardIdValid(u32 card_id) {
+static bool cardIdValid(u32 card_id) {
 	return (card_id != 0) && ((card_id >> 16) != 0xFFFF);
 }
 
 
-static inline bool romHeaderValid(tNDSHeader* rom_header) {
+static bool romHeaderValid(tNDSHeader* rom_header) {
 	return swiCRC16(0xFFFF, rom_header, sizeof(tNDSHeader) - sizeof(u16)) == rom_header->headerCRC16;
 }
 
 
-static inline bool slot1Disabled(void) {
+static bool slot1Disabled(void) {
 	return (REG_SCFG_MC & SCFG_MC_PWR_MASK) != SCFG_MC_PWR_ON;
 }
 
@@ -434,7 +437,7 @@ bool Slot1_InitCard(void) {
 	// Key1 + Blowfish setup (not needed after we enter main data mode)
 	Key1Ctx key1;
 	u32 game_code = *(u32*)(&sCardCtx.rom_header.gameCode[0]);
-	Key1Cmd_Init(&key1, game_code);
+	Key1_Init(&key1, game_code);
 	
 	// Set up flags for key1 communication
 	u32 ctrl_13 = sCardCtx.rom_header.cardControl13;
@@ -450,13 +453,13 @@ bool Slot1_InitCard(void) {
 	CardCommand cmd;
 	
 	// Activate key1 mode (Blowfish) (unencrypted command)
-	Key1Cmd_MakeActivateKey1(&key1, &cmd);
+	Key1_MakeCmdActivateKey1(&key1, &cmd);
 	u32 opflags = ctrl_13 & (CARD_WR | CARD_CLK_SLOW);
 	sendCommand(&cmd, opflags);
 	ignoreCommandReturn();
 	
 	// Activate key2 mode (hardware)
-	Key1Cmd_MakeActivateKey2(&key1, &cmd);
+	Key1_MakeCmdActivateKey2(&key1, &cmd);
 	if (normal_chip) {
 		sendCommand(&cmd, flags_key1);
 		ignoreCommandReturn();
@@ -466,11 +469,11 @@ bool Slot1_InitCard(void) {
 	ignoreCommandReturn();
 	
 	// Configure key2 hardware registers
-	Key1Cmd_ConfigureKey2Hardware(&key1, sCardCtx.rom_header.deviceType);
+	Key1_ConfigureKey2Hardware(&key1, sCardCtx.rom_header.deviceType);
 	u32 flags_key2 = flags_key1 | CARD_SEC_EN | CARD_SEC_DAT;
 	
 	// Get card ID (0x10)
-	Key1Cmd_MakeGetCardId10(&key1, &cmd);
+	Key1_MakeCmdGetCardId10(&key1, &cmd);
 	if (normal_chip) {
 		sendCommand(&cmd, flags_key2);
 		ignoreCommandReturn();
@@ -487,7 +490,7 @@ bool Slot1_InitCard(void) {
 	}
 	
 	// Enter main data mode for B7/B8
-	Key1Cmd_MakeEnterMainDataMode(&key1, &cmd);
+	Key1_MakeCmdEnterMainDataMode(&key1, &cmd);
 	if (normal_chip) {
 		sendCommand(&cmd, flags_key2);
 		ignoreCommandReturn();

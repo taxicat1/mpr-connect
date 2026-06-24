@@ -20,7 +20,7 @@ static u32 getEooRomOffset(void) {
 #endif
 
 
-static inline u32 fourAlignUp(u32 x) {
+static u32 fourAlignUp(u32 x) {
 	return (x + 3) & ~3;
 }
 
