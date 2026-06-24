@@ -48,6 +48,7 @@ cache_loop:
 	mcr    p15, 0, r1, c7, c14, 1  // DC flush
 	mcr    p15, 0, r1, c7, c5,  1  // IC invalidate
 	cmp    r2, #(0x20 - 0x8)
+	movhi  r2, #0
 	addhi  r1, r1, #0x20
 	bhi    cache_loop
 	
