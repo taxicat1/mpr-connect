@@ -1,5 +1,4 @@
 #include <nds.h>
-#include <nds/ndstypes.h>
 
 #include "ds_mode_9.h"
 
