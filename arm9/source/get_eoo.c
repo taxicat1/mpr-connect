@@ -52,11 +52,7 @@ static s16 FS_FindFolderItem(
 		u32 name_len = item_metadata & ~0x80;
 		
 		// Check for match against target
-		if (
-			type == target_type && 
-			name_len == target_name_len &&
-			strncmp(folder_contents_list, target_name, target_name_len) == 0
-		) {
+		if (type == target_type && name_len == target_name_len && strncmp(folder_contents_list, target_name, name_len) == 0) {
 			// Found target
 			if (type == FS_FOLDER) {
 				// Read two byte folder index data after name
