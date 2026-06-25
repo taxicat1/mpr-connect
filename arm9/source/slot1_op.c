@@ -550,16 +550,18 @@ void Slot1_ReadRom(void* dst, u32 src_addr, u32 len) {
 	
 	u8 page_buffer[0x200] __attribute__((aligned(4)));
 	
+	CardCommand cmd = { 0 };
+	cmd.bytes[7] = CARD_CMD_DATA_READ;
+	
+	u32 ctrl_13 = sCardCtx.rom_header.cardControl13;
+	u32 opflags = (ctrl_13 & ~CARD_DATA_LEN_MASK) | CARD_DATA_LEN_200;
+	
 	while (len != 0) {
-		CardCommand cmd = { 0 };
-		cmd.bytes[7] = CARD_CMD_DATA_READ;
 		cmd.bytes[6] = src_addr >> 24;
 		cmd.bytes[5] = src_addr >> 16;
 		cmd.bytes[4] = src_addr >> 8;
 		cmd.bytes[3] = src_addr;
 		
-		u32 ctrl_13 = sCardCtx.rom_header.cardControl13;
-		u32 opflags = (ctrl_13 & ~CARD_DATA_LEN_MASK) | CARD_DATA_LEN_200;
 		sendCommand(&cmd, opflags);
 		copyCommandReturn(&page_buffer[0], 0x200);
 		

@@ -39,17 +39,17 @@ static s16 FS_FindFolderItem(
 	u32                   target_name_len,
 	FSItemType            target_type
 ) {
-	s16 folder_item_idx = 0;
+	s16 folder_item_idx = cur_folder->fat_contents_start_idx;
 	const char* folder_contents_list = (const char*)fnt_data + cur_folder->fnt_contents_start_offset;
 	while (TRUE) {
-		u8 name_len = *folder_contents_list++;
-		if (name_len == 0) {
+		u8 item_metadata = *folder_contents_list++;
+		if (item_metadata == 0) {
 			// End of folder contents
 			return -1;
 		}
 		
-		FSItemType type = (name_len & 0x80) ? FS_FOLDER : FS_FILE;
-		name_len &= ~0x80;
+		FSItemType type = (item_metadata & 0x80) ? FS_FOLDER : FS_FILE;
+		u32 name_len = item_metadata & ~0x80;
 		
 		// Check for match against target
 		if (
@@ -59,9 +59,9 @@ static s16 FS_FindFolderItem(
 		) {
 			// Found target
 			if (type == FS_FOLDER) {
-				// Read two byte folder index data
-				folder_item_idx = folder_contents_list[name_len] | (folder_contents_list[name_len + 1] << 8);
-				return folder_item_idx & ~0xF000;
+				// Read two byte folder index data after name
+				s16 folder_name_idx = folder_contents_list[name_len] | (folder_contents_list[name_len + 1] << 8);
+				return folder_name_idx & ~0xF000;
 			} else {
 				// Use normal item index within folder
 				return folder_item_idx;
@@ -106,7 +106,6 @@ static u32 getEooRomOffset(void) {
 	}
 	
 	// Finally get location of eoo.dat from file allocation table
-	eoo_dat_fat_idx += data_folder->fat_contents_start_idx;
 	FSFATEntry eoo_dat_fat;
 	Slot1_ReadRom(&eoo_dat_fat, slot1_header->fatOffset + (eoo_dat_fat_idx * sizeof(FSFATEntry)), sizeof(FSFATEntry));
 	
