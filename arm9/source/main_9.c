@@ -79,10 +79,10 @@ void ITCM_CODE doBoot(const tNDSHeader* boot_header, const void* boot_arm9, cons
 int main(int argc, char* argv[]) {
 	// Display top screen graphic
 	videoSetMode(MODE_5_2D);
-    vramSetBankA(VRAM_A_MAIN_BG);
-    int bg = bgInit(2, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
-    memcpy(bgGetGfxPtr(bg), top_screen_imgBitmap, top_screen_imgBitmapLen);
-    bgShow(bg);
+	vramSetBankA(VRAM_A_MAIN_BG);
+	int bg = bgInit(2, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
+	decompress(top_screen_imgBitmap, bgGetGfxPtr(bg), LZ77Vram);
+	bgShow(bg);
 	
 	// Set up bottom screen console for error reporting
 	videoSetModeSub(MODE_0_2D);

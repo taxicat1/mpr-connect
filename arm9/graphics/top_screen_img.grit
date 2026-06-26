@@ -1,2 +1,2 @@
-# 16 bpp, bitmap, set alpha bit to 1, not compressed
--gB16 -gb -gT!
+# 16 bpp, bitmap, set alpha bit to 1, LZ77 compressed
+-gB16 -gb -gT! -gzl
