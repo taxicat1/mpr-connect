@@ -148,9 +148,9 @@ bool Eoo_Init(void) {
 		return FALSE;
 	}
 	
-	sEoo.header = (void*)((u32)boot_region_base);
-	sEoo.arm9   = (void*)((u32)boot_region_base + header_space);
-	sEoo.arm7   = (void*)((u32)boot_region_base + header_space + arm9_space);
+	sEoo.header = (tNDSHeader*)boot_region_base;
+	sEoo.arm9 = (void*)((u32)boot_region_base + header_space);
+	sEoo.arm7 = (void*)((u32)boot_region_base + header_space + arm9_space);
 	
 	Slot1_ReadRom(sEoo.arm9, eoo_rom_offset + sEoo.header->arm9romOffset, sEoo.header->arm9binarySize);
 	Slot1_ReadRom(sEoo.arm7, eoo_rom_offset + sEoo.header->arm7romOffset, sEoo.header->arm7binarySize);
