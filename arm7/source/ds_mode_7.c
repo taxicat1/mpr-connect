@@ -1,10 +1,4 @@
 #include <nds.h>
-#include <nds/ndstypes.h>
-
-#include <nds/arm7/codec.h>
-#include <nds/arm7/audio.h>
-#include <nds/arm7/i2c.h>
-#include <nds/ipc.h>
 
 #include "ds_mode_7.h"
 

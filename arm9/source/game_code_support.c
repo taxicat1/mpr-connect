@@ -1,7 +1,7 @@
 #include <nds.h>
 
-#include "pkmn_game_codes.h"
 #include "game_code_support.h"
+#include "pkmn_game_codes.h"
 
 
 bool GameCode_IsSupported(u32 game_code) {

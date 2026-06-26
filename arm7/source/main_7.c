@@ -1,8 +1,8 @@
 #include <nds.h>
 
 #include "ds_mode_7.h"
-#include "vcount_spinwait.h"
 #include "hardware_mode.h"
+#include "vcount_spinwait.h"
 
 
 static HardwareMode detectHardware(void) {

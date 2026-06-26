@@ -1,16 +1,14 @@
-#include <stdio.h>
 #include <nds.h>
-#include <nds/ndstypes.h>
 
-#include "slot1_op.h"
-#include "vcount_spinwait.h"
-#include "hardware_mode.h"
 #include "bin_util.h"
+#include "ds_mode_9.h"
 #include "game_code_support.h"
 #include "get_eoo.h"
+#include "hardware_mode.h"
 #include "pkmn_game_codes.h"
-#include "top_screen_img.h"
-#include "ds_mode_9.h"
+#include "slot1_op.h"
+#include "top_screen_img.h"  /* GRIT image header */
+#include "vcount_spinwait.h"
 
 
 static void prepareBoot() {

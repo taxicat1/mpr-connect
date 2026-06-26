@@ -1,5 +1,4 @@
 #include <nds.h>
-#include <memory.h>
 
 #include "slot1_op.h"
 
@@ -107,6 +106,7 @@ static void copyCommandReturn(void* dest, u32 max_len) {
 static void ignoreCommandReturn(void) {
 	copyCommandReturn(NULL, 0);
 }
+
 
 
 // Blowfish stuff
