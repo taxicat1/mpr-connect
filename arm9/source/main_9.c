@@ -155,7 +155,7 @@ int main(int argc, char* argv[]) {
 		if (!game_code_ok)  {
 			printf("Slot-1 Card is not a supported \n"
 			       "Pokemon Diamond, Pearl,        \n"
-				   "or Platinum                    \n");
+			       "or Platinum                    \n");
 			continue;
 		}
 		
