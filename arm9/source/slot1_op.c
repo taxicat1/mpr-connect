@@ -297,17 +297,17 @@ static void Key1_MakeCmdGetCardId10(Key1Ctx* key1, CardCommand* dst) {
 
 // Slot1 stuff
 
-static int cardIdValid(u32 card_id) {
+static bool cardIdValid(u32 card_id) {
 	return (card_id != 0) && ((card_id >> 16) != 0xFFFF);
 }
 
 
-static int romHeaderValid(tNDSHeader* rom_header) {
+static bool romHeaderValid(tNDSHeader* rom_header) {
 	return swiCRC16(0xFFFF, rom_header, sizeof(tNDSHeader) - sizeof(u16)) == rom_header->headerCRC16;
 }
 
 
-static int slot1Disabled(void) {
+static bool slot1Disabled(void) {
 	return (REG_SCFG_MC & SCFG_MC_PWR_MASK) != SCFG_MC_PWR_ON;
 }
 
@@ -391,7 +391,7 @@ static void getCardHeader(void* dst) {
 }
 
 
-int Slot1_InitCard(void) {
+bool Slot1_InitCard(void) {
 	sysSetCardOwner(BUS_OWNER_ARM9);
 	
 	// Check for pullout, which will remove the inited flag if it detects such
@@ -432,7 +432,7 @@ int Slot1_InitCard(void) {
 		return FALSE;
 	}
 	
-	int normal_chip = card_id_90 & 0x80000000;
+	bool normal_chip = card_id_90 & 0x80000000;
 	
 	// Key1 + Blowfish setup (not needed after we enter main data mode)
 	Key1Ctx key1;
@@ -589,7 +589,7 @@ void Slot1_ReadRom(void* dst, u32 src_addr, u32 len) {
 }
 
 
-int Slot1_CheckPullout(void) {
+bool Slot1_CheckPullout(void) {
 	if (!sCardCtx.inited) {
 		return TRUE;
 	}

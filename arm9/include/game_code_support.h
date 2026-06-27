@@ -3,6 +3,6 @@
 
 #include <nds.h>
 
-int GameCode_IsSupported(u32 game_code);
+bool GameCode_IsSupported(u32 game_code);
 
 #endif

@@ -115,7 +115,7 @@ static u32 fourAlignUp(u32 x) {
 }
 
 
-int Eoo_Init(void) {
+bool Eoo_Init(void) {
 	u32 eoo_rom_offset = getEooRomOffset();
 	if (eoo_rom_offset == 0xFFFFFFFF) {
 		return FALSE;
