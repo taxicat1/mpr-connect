@@ -121,6 +121,10 @@ bool Eoo_Init(void) {
 		return FALSE;
 	}
 	
+	if (sEoo.header != NULL) {
+		free(sEoo.header);
+	}
+	
 	sEoo.header = malloc(sizeof(tNDSHeader));
 	if (sEoo.header == NULL) {
 		return FALSE;
