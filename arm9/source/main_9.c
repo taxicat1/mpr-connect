@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// Ready for main loop
-	bool card_detected = FALSE;
+	int card_detected = FALSE;
 	while (TRUE) {
 		swiWaitForVBlank();
 		
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
 		consoleClear();
 		
 		// Try to initialize Slot-1
-		bool slot1_ok = Slot1_InitCard();
+		int slot1_ok = Slot1_InitCard();
 		if (!slot1_ok) {
 			printf("Failed to read Slot-1 Card!    \n");
 			switch (cur_hardware) {
@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
 		
 		// Check that the game we found in Slot-1 is supported
 		u32 game_code = Slot1_GetGameCode();
-		bool game_code_ok = GameCode_IsSupported(game_code);
+		int game_code_ok = GameCode_IsSupported(game_code);
 		if (!game_code_ok)  {
 			printf("Slot-1 Card is not a supported \n"
 			       "Pokemon Diamond, Pearl,        \n"
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
 		}
 		
 		// Set up eoo.dat from game ROM into RAM
-		bool eoo_ok = Eoo_Init();
+		int eoo_ok = Eoo_Init();
 		if (!eoo_ok) {
 			printf("Failed to start connection to  \n"
 			       "Ranch! This should not happen! \n");
