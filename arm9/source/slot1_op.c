@@ -42,7 +42,7 @@ typedef struct {
 } Key1Ctx;
 
 typedef struct {
-	int         inited;
+	bool        inited;
 	u32         card_id;
 	tNDSHeader  rom_header;
 } CardSlot1Data;
@@ -397,7 +397,7 @@ bool Slot1_InitCard(void) {
 	// Check for pullout, which will remove the inited flag if it detects such
 	Slot1_CheckPullout();
 	if (sCardCtx.inited) {
-		return TRUE;
+		return true;
 	}
 	
 	// Check if we are running from Download Play and the card is already inited
@@ -411,8 +411,8 @@ bool Slot1_InitCard(void) {
 			if (cardIdValid(card_id) && card_id == getCardIdB8()) {
 				// Seems good
 				sCardCtx.card_id = card_id;
-				sCardCtx.inited = TRUE;
-				return TRUE;
+				sCardCtx.inited = true;
+				return true;
 			}
 		}
 	}
@@ -423,13 +423,13 @@ bool Slot1_InitCard(void) {
 	// Get card ID (0x90)
 	u32 card_id_90 = getCardId90();
 	if (!cardIdValid(card_id_90)) {
-		return FALSE;
+		return false;
 	}
 	
 	// Read ROM header
 	getCardHeader(&sCardCtx.rom_header);
 	if (!romHeaderValid(&sCardCtx.rom_header)) {
-		return FALSE;
+		return false;
 	}
 	
 	bool normal_chip = card_id_90 & 0x80000000;
@@ -486,7 +486,7 @@ bool Slot1_InitCard(void) {
 	
 	// Check card IDs to make sure key1 is working
 	if (card_id_10 != card_id_90) {
-		return FALSE;
+		return false;
 	}
 	
 	// Enter main data mode for B7/B8
@@ -503,13 +503,13 @@ bool Slot1_InitCard(void) {
 	// Success here means B7 commands will also work
 	u32 card_id_b8 = getCardIdB8();
 	if (card_id_b8 != card_id_10) {
-		return FALSE;
+		return false;
 	}
 	
 	sCardCtx.card_id = card_id_b8;
-	sCardCtx.inited = TRUE;
+	sCardCtx.inited = true;
 	
-	return TRUE;
+	return true;
 }
 
 
@@ -591,14 +591,14 @@ void Slot1_ReadRom(void* dst, u32 src_addr, u32 len) {
 
 bool Slot1_CheckPullout(void) {
 	if (!sCardCtx.inited) {
-		return TRUE;
+		return true;
 	}
 	
 	u32 card_id_b8 = getCardIdB8();
 	if (card_id_b8 != sCardCtx.card_id) {
-		sCardCtx.inited = FALSE;
-		return TRUE;
+		sCardCtx.inited = false;
+		return true;
 	}
 	
-	return FALSE;
+	return false;
 }

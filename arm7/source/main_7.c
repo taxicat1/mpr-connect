@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 	HardwareMode cur_hardware = detectHardware();
 	fifoSendValue32(FIFO_USER_01, (u32)cur_hardware);
 	
-	while (TRUE) {
+	while (true) {
 		if (fifoCheckAddress(FIFO_USER_01)) {
 			void* volatile* entry_ptr = (void* volatile*)fifoGetAddress(FIFO_USER_01);
 			doBoot(entry_ptr);

@@ -32,9 +32,9 @@ static const u32 sSupportedGameCodes[] = {
 bool GameCode_IsSupported(u32 game_code) {
 	for (int i = 0; sSupportedGameCodes[i] != GAME_CODE_OTHER; i++) {
 		if (sSupportedGameCodes[i] == game_code) {
-			return TRUE;
+			return true;
 		}
 	}
 	
-	return FALSE;
+	return false;
 }

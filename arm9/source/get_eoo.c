@@ -41,7 +41,7 @@ static s16 FS_FindFolderItem(
 ) {
 	s16 folder_item_idx = cur_folder->fat_contents_start_idx;
 	const char* folder_contents_list = (const char*)fnt_data + cur_folder->fnt_contents_start_offset;
-	while (TRUE) {
+	while (true) {
 		u8 item_metadata = *folder_contents_list++;
 		if (item_metadata == 0) {
 			// End of folder contents
@@ -118,7 +118,7 @@ static u32 fourAlignUp(u32 x) {
 bool Eoo_Init(void) {
 	u32 eoo_rom_offset = getEooRomOffset();
 	if (eoo_rom_offset == 0xFFFFFFFF) {
-		return FALSE;
+		return false;
 	}
 	
 	if (sEoo.header != NULL) {
@@ -127,7 +127,7 @@ bool Eoo_Init(void) {
 	
 	sEoo.header = malloc(sizeof(tNDSHeader));
 	if (sEoo.header == NULL) {
-		return FALSE;
+		return false;
 	}
 	Slot1_ReadRom(sEoo.header, eoo_rom_offset, sizeof(tNDSHeader));
 	
@@ -135,7 +135,7 @@ bool Eoo_Init(void) {
 	if (swiCRC16(0xFFFF, sEoo.header, sizeof(tNDSHeader) - sizeof(u16)) != sEoo.header->headerCRC16) {
 		free(sEoo.header);
 		sEoo.header = NULL;
-		return FALSE;
+		return false;
 	}
 	
 	// Arrange memory so there is a contiguous [header]..[ARM9]..[ARM7].. for copying later
@@ -149,7 +149,7 @@ bool Eoo_Init(void) {
 	if (boot_region_base == NULL) {
 		free(sEoo.header);
 		sEoo.header = NULL;
-		return FALSE;
+		return false;
 	}
 	
 	sEoo.header = (tNDSHeader*)boot_region_base;
@@ -159,7 +159,7 @@ bool Eoo_Init(void) {
 	Slot1_ReadRom(sEoo.arm9, eoo_rom_offset + sEoo.header->arm9romOffset, sEoo.header->arm9binarySize);
 	Slot1_ReadRom(sEoo.arm7, eoo_rom_offset + sEoo.header->arm7romOffset, sEoo.header->arm7binarySize);
 	
-	return TRUE;
+	return true;
 }
 
 

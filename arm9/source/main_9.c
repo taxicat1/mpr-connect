@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 	
 	// Wait for hardware information from the ARM7
 	HardwareMode cur_hardware;
-	while (TRUE) {
+	while (true) {
 		if (fifoCheckValue32(FIFO_USER_01)) {
 			cur_hardware = (HardwareMode)fifoGetValue32(FIFO_USER_01);
 			break;
@@ -102,13 +102,13 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// Ready for main loop
-	bool card_detected = FALSE;
-	while (TRUE) {
+	bool card_detected = false;
+	while (true) {
 		swiWaitForVBlank();
 		
 		// If there was a card and now it's ejected, clear the console early
 		if (card_detected && Slot1_CheckPullout()) {
-			card_detected = FALSE;
+			card_detected = false;
 			consoleClear();
 		}
 		
@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
 		}
 		
 		// We were able to talk to something
-		card_detected = TRUE;
+		card_detected = true;
 		
 		// Check that the game we found in Slot-1 is supported
 		u32 game_code = Slot1_GetGameCode();

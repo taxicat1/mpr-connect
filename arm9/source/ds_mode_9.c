@@ -5,7 +5,7 @@
 
 void DSMode9_Enable(void) {
 	// DS mode main clock
-	setCpuClock(FALSE);
+	setCpuClock(false);
 	
 	// DS mode SCFG
 	// This freezes the system. Seems to work without it?
