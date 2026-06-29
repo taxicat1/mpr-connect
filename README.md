@@ -6,7 +6,7 @@ This requires the Pokémon cartridge to be in Slot-1 of the console while the pr
 - Use a CFW 3DS/2DS and launch mpr-connect via TWiLight Menu++
 - Use a modded DSi and launch mpr-connect via TWiLight Menu++ through Unlaunch
 - Use a Slot-1 flashcart (R4 etc.) to launch mpr-connect, eject the flashcart, and then insert the Pokémon cartridge (DS Lite/Phat only, unless your flashcart is a DSpico)
-- Use the Haxxstation exploit to run mpr-connect via DS Download Play
+- Use the HaxxStation exploit to run mpr-connect via DS Download Play
 
 ## Building
 
