@@ -26,7 +26,6 @@ typedef struct {
 	u16  llll;   //<! Random, same for future commands
 	u16  mmm;    //<! Random, same for future commands, key2 seed
 	u16  nnn;    //<! Random, same for future commands, key2 seed
-	u16  _pad;
 } KeyParam;
 
 typedef struct {
