@@ -301,7 +301,7 @@ static bool cardIdValid(u32 card_id) {
 }
 
 
-static bool romHeaderValid(tNDSHeader* rom_header) {
+static bool romHeaderValid(const tNDSHeader* rom_header) {
 	return swiCRC16(0xFFFF, rom_header, sizeof(tNDSHeader) - sizeof(u16)) == rom_header->headerCRC16;
 }
 
@@ -399,9 +399,10 @@ bool Slot1_InitCard(void) {
 		return true;
 	}
 	
-	// Check if we are running from Download Play and the card is already inited
-	if (*(vu16*)0x027FFC40 == 2) {
-		tNDSHeader* rom_header = (tNDSHeader*)0x023FE940;
+	// Check if we are running from Download Play or the 3DS home menu and the card is already inited
+	u16 boot_source = *(vu16*)0x02FFFC40;
+	if (boot_source == 2 || boot_source == 3) {
+		const tNDSHeader* rom_header = (const tNDSHeader*)0x02FFFA80;
 		if (romHeaderValid(rom_header)) {
 			// Need to get the header first for the card command flags
 			memcpy(&sCardCtx.rom_header, rom_header, sizeof(tNDSHeader));

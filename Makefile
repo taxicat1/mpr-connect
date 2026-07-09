@@ -15,18 +15,18 @@ GAME_ICON       := icon.png
 # A compile_commands.json file is created if this is set to 1
 COMPDB ?= 0
 
-
-# Source code paths
-# -----------------
-
-# List of folders to combine into the root of NitroFS:
-#NITROFSDIR := nitrofs
-
 # Tools
 # -----
 
-MAKE  := make
-RM    := rm -rf
+MAKE      := make
+RM        := rm -rf
+NDSTOOL   := $(BLOCKSDS)/tools/ndstool/ndstool
+
+ifeq ($(OS),Windows_NT)
+MAKE_CIA  := make_cia/windows/make_cia.exe
+else
+MAKE_CIA  := make_cia/linux/make_cia
+endif
 
 # Verbose flag
 # ------------
@@ -43,23 +43,25 @@ endif
 ARM9DIR  := arm9
 ARM7DIR  := arm7
 
-# Build artfacts
-# --------------
+# Build artifacts
+# ---------------
 
-ROM := $(NAME).nds
+ROM  := $(NAME).nds
+DSI  := $(NAME).dsi
+CIA  := $(NAME).cia
 
 # Targets
 # -------
 
 .PHONY: all clean arm9 arm7
 
-all: $(ROM)
+all: $(ROM) $(CIA)
 
 clean:
 	@echo "  CLEAN"
 	$(V)$(MAKE) -f Makefile.arm9 clean --no-print-directory
 	$(V)$(MAKE) -f Makefile.arm7 clean --no-print-directory
-	$(V)$(RM) $(ROM) build compile_commands.json
+	$(V)$(RM) $(ROM) $(CIA) build compile_commands.json
 
 arm9:
 	$(V)+$(MAKE) -f Makefile.arm9 COMPDB=$(COMPDB) --no-print-directory
@@ -77,14 +79,6 @@ compile_commands.json: arm9 arm7
 		build/*/compile_commands.json
 endif
 
-ifneq ($(strip $(NITROFSDIR)),)
-# Additional arguments for ndstool
-NDSTOOL_ARGS  := -d $(NITROFSDIR)
-
-# Make the NDS ROM depend on the filesystem only if it is needed
-$(ROM): $(NITROFSDIR)
-endif
-
 # Combine the title strings
 ifeq ($(strip $(GAME_SUBTITLE)),)
   GAME_FULL_TITLE := $(GAME_TITLE);$(GAME_AUTHOR)
@@ -94,7 +88,20 @@ endif
 
 $(ROM): arm9 arm7
 	@echo "  NDSTOOL $@"
-	$(V)$(BLOCKSDS)/tools/ndstool/ndstool -c $@ \
+	$(V)$(NDSTOOL) -c $@ \
+		-7 build/arm7.elf -9 build/arm9.elf \
+		-b $(GAME_ICON) "$(GAME_FULL_TITLE)"
+
+# CIA stuff
+# ---------
+
+$(DSI): arm9 arm7
+	@echo "  NDSTOOL $@"
+	$(V)$(NDSTOOL) -c $@ \
 		-7 build/arm7.elf -9 build/arm9.elf \
 		-b $(GAME_ICON) "$(GAME_FULL_TITLE)" \
-		$(NDSTOOL_ARGS)
+		-g HPRA 00 "MPR CONNECT" -z 80040000 -a 00018120
+
+$(CIA): $(DSI)
+	@echo "  MAKECIA $@"
+	$(V)$(MAKE_CIA) --srl=$<
